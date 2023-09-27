@@ -6,20 +6,20 @@ from bot_handler import RabbitHandler
 from bot_comms import from_bot_manager, send_to_user, get_input, send_prompt, from_bot_to_bot_manager
 import sys
 
-from loaders.todo import MSGetTasks, MSGetTaskFolders, MSGetTaskDetail, MSSetTaskComplete, MSCreateTask, MSDeleteTask, MSCreateTaskFolder, MSUpdateTask
-from loaders.calendar import MSGetCalendarEvents, MSGetCalendarEvent, MSCreateCalendarEvent
-from loaders.todo import scheduler_get_task_due_today, scheduler_get_bots_unscheduled_task
-from loaders.outlook import scheduler_check_emails
-from loaders.outlook import (
-    MSSearchEmailsId,
-    MSGetEmailDetail,
-    MSDraftEmail,
-    MSSendEmail,
-    MSReplyToEmail,
-    MSForwardEmail,
-    MSDraftForwardEmail,
-    MSDraftReplyToEmail
-)
+#from loaders.todo import MSGetTasks, MSGetTaskFolders, MSGetTaskDetail, MSSetTaskComplete, MSCreateTask, MSDeleteTask, MSCreateTaskFolder, MSUpdateTask
+#from loaders.calendar import MSGetCalendarEvents, MSGetCalendarEvent, MSCreateCalendarEvent
+#from loaders.todo import scheduler_get_task_due_today, scheduler_get_bots_unscheduled_task
+#from loaders.outlook import scheduler_check_emails
+#from loaders.outlook import (
+#    MSSearchEmailsId,
+#    MSGetEmailDetail,
+#    MSDraftEmail,
+#    MSSendEmail,
+#    MSReplyToEmail,
+#    MSForwardEmail,
+#    MSDraftForwardEmail,
+#    MSDraftReplyToEmail
+#)
 
 from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent
@@ -76,9 +76,9 @@ class aiBot:
             if incoming_credentials:
                 self.credentials = incoming_credentials
                 bot_config.OPENAI_API_KEY = self.get_credential('openai_api')
-                bot_config.TENANT_ID = self.get_credential('tenant_id')
+                #bot_config.TENANT_ID = self.get_credential('tenant_id')
                 bot_config.FRIENDLY_NAME = self.get_credential('user_name')
-                bot_config.OFFICE_USER = self.get_credential('email_address')
+                #bot_config.OFFICE_USER = self.get_credential('email_address')
                 self.bot_init()
 
             if prompt == "ping":
@@ -101,50 +101,50 @@ class aiBot:
         response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
         self.logger.info(response)
 
-    def process_task_schedule(self):
-        if self.initialised:
-            "check tasks"
-            while True:
-                task = scheduler_get_task_due_today(bot_config.Todo_BotsTaskFolder)
-                if task:
-                    #self.logger.info(task)
-                    self.logger.info(task.subject)
-                    send_to_user(f"Looks like one of my tasks is due - {task.subject}")
-                    current_date_time = datetime.now() 
-                    try:
-                        inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
-                        response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
-                        task.body = response
-                        task.mark_completed()
-                        task.save()
-                    except Exception as e:
-                        send_to_user( f"An exception occurred: {e}")
-                else:
-                    break
+    # def process_task_schedule(self):
+    #     if self.initialised:
+    #         "check tasks"
+    #         while True:
+    #             task = scheduler_get_task_due_today(bot_config.Todo_BotsTaskFolder)
+    #             if task:
+    #                 #self.logger.info(task)
+    #                 self.logger.info(task.subject)
+    #                 send_to_user(f"Looks like one of my tasks is due - {task.subject}")
+    #                 current_date_time = datetime.now() 
+    #                 try:
+    #                     inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
+    #                     response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
+    #                     task.body = response
+    #                     task.mark_completed()
+    #                     task.save()
+    #                 except Exception as e:
+    #                     send_to_user( f"An exception occurred: {e}")
+    #             else:
+    #                 break
 
-            while True:
-                task = scheduler_get_bots_unscheduled_task(bot_config.Todo_BotsTaskFolder)
-                if task:
-                    #self.logger.info(task)
-                    self.logger.info(task.subject)
-                    send_to_user(f"Looks like one of my tasks is due - {task.subject}")
-                    bot_logging.info(task.subject)
-                    current_date_time = datetime.now() 
-                    try:
-                        inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
-                        response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
-                        task.body = response
-                        task.mark_completed()
-                        task.save()
-                    except Exception as e:
-                        send_to_user( f"An exception occurred: {e}")
-                else:
-                    break
+    #         while True:
+    #             task = scheduler_get_bots_unscheduled_task(bot_config.Todo_BotsTaskFolder)
+    #             if task:
+    #                 #self.logger.info(task)
+    #                 self.logger.info(task.subject)
+    #                 send_to_user(f"Looks like one of my tasks is due - {task.subject}")
+    #                 bot_logging.info(task.subject)
+    #                 current_date_time = datetime.now() 
+    #                 try:
+    #                     inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
+    #                     response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
+    #                     task.body = response
+    #                     task.mark_completed()
+    #                     task.save()
+    #                 except Exception as e:
+    #                     send_to_user( f"An exception occurred: {e}")
+    #             else:
+    #                 break
 
-    def process_email_schedule(self):
-        if self.initialised:
-            "check emails"
-            scheduler_check_emails()
+    # def process_email_schedule(self):
+    #     if self.initialised:
+    #         "check emails"
+    #         scheduler_check_emails()
 
     def heartbeat(self):
         from_bot_to_bot_manager('heartbeat', os.getpid())
@@ -153,26 +153,26 @@ class aiBot:
         
         tools = load_tools(["human"], input_func=get_input, prompt_func=send_prompt, llm=llm)
         
-        tools.append(MSGetTaskFolders())
-        tools.append(MSGetTasks())
-        tools.append(MSGetTaskDetail())
-        tools.append(MSSetTaskComplete())
-        tools.append(MSCreateTask())
-        tools.append(MSDeleteTask())
-        tools.append(MSCreateTaskFolder())
+        # tools.append(MSGetTaskFolders())
+        # tools.append(MSGetTasks())
+        # tools.append(MSGetTaskDetail())
+        # tools.append(MSSetTaskComplete())
+        # tools.append(MSCreateTask())
+        # tools.append(MSDeleteTask())
+        # tools.append(MSCreateTaskFolder())
         
-        tools.append(MSSearchEmailsId())
-        tools.append(MSGetEmailDetail())
-        tools.append(MSDraftEmail())
-        tools.append(MSSendEmail())
-        tools.append(MSReplyToEmail())
-        tools.append(MSForwardEmail())
-        tools.append(MSDraftReplyToEmail())
-        tools.append(MSDraftForwardEmail())
+        # tools.append(MSSearchEmailsId())
+        # tools.append(MSGetEmailDetail())
+        # tools.append(MSDraftEmail())
+        # tools.append(MSSendEmail())
+        # tools.append(MSReplyToEmail())
+        # tools.append(MSForwardEmail())
+        # tools.append(MSDraftReplyToEmail())
+        # tools.append(MSDraftForwardEmail())
 
-        tools.append(MSGetCalendarEvents())
-        tools.append(MSGetCalendarEvent())
-        tools.append(MSCreateCalendarEvent())
+        # tools.append(MSGetCalendarEvents())
+        # tools.append(MSGetCalendarEvent())
+        # tools.append(MSCreateCalendarEvent())
 
         return tools
     

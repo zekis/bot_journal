@@ -21,10 +21,11 @@ import threading
 #from aiohttp import web
 #from botbuilder.core.integration import aiohttp_error_middleware
 
-from bot_manager import process_server_message, register_self
+from bot_manager import process_server_message, register_self, clear_heartbeats
 
 async def main_loop():
     #logger.info("Start message processing")
+    clear_heartbeats()
     register_self()
 
     while True:
@@ -40,7 +41,7 @@ async def heartbeat_loop():
 
 async def main():
     bot_config.BOT_ID = "journal"
-    bot_config.BOT_DESCRIPTION = "used to store and retrieve the users journal of daily activities"
+    bot_config.BOT_DESCRIPTION = "used to store and retrieve the users journal/history of daily activities"
     
 
     logger = bot_logging.logging.getLogger('Bot_Journal') 

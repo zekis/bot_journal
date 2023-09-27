@@ -19,9 +19,9 @@ DATA_DIR = "data"
 
 #These are set on startup
 OPENAI_API_KEY = ""
-TENANT_ID = ""
+#TENANT_ID = ""
 FRIENDLY_NAME = ""
-OFFICE_USER = ""
+#OFFICE_USER = ""
 
 RESET_CONFIG = False
 VERBOSE = True

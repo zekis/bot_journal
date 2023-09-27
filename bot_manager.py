@@ -179,7 +179,8 @@ async def process_server_message():
     #         del self.user_processes[user_id]
     #         bot_logger.warn(f"Bot stopped.")
 
-
+def clear_heartbeats():
+    clear_queue(bot_config.BOT_ID)
 
 def register_self():
     "send register message to server"
