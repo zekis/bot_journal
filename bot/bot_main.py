@@ -20,6 +20,7 @@ import sys
 #    MSDraftForwardEmail,
 #    MSDraftReplyToEmail
 #)
+from loaders.onenote import NoteCreate, NoteAppend
 
 from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent
@@ -76,9 +77,14 @@ class aiBot:
             if incoming_credentials:
                 self.credentials = incoming_credentials
                 bot_config.OPENAI_API_KEY = self.get_credential('openai_api')
-                #bot_config.TENANT_ID = self.get_credential('tenant_id')
+                bot_config.APP_ID = self.get_credential('app_id')
+                bot_config.APP_SECRET = self.get_credential('app_secret')
+                bot_config.TENANT_ID = self.get_credential('tenant_id')
                 bot_config.FRIENDLY_NAME = self.get_credential('user_name')
-                #bot_config.OFFICE_USER = self.get_credential('email_address')
+                bot_config.OFFICE_USER = self.get_credential('email_address')
+                bot_config.NOTEBOOK = self.get_credential('notebook')
+                bot_config.SECTION = self.get_credential('section')
+                bot_config.PAGE = self.get_credential('page')
                 self.bot_init()
 
             if prompt == "ping":
@@ -101,50 +107,7 @@ class aiBot:
         response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
         self.logger.info(response)
 
-    # def process_task_schedule(self):
-    #     if self.initialised:
-    #         "check tasks"
-    #         while True:
-    #             task = scheduler_get_task_due_today(bot_config.Todo_BotsTaskFolder)
-    #             if task:
-    #                 #self.logger.info(task)
-    #                 self.logger.info(task.subject)
-    #                 send_to_user(f"Looks like one of my tasks is due - {task.subject}")
-    #                 current_date_time = datetime.now() 
-    #                 try:
-    #                     inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
-    #                     response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
-    #                     task.body = response
-    #                     task.mark_completed()
-    #                     task.save()
-    #                 except Exception as e:
-    #                     send_to_user( f"An exception occurred: {e}")
-    #             else:
-    #                 break
-
-    #         while True:
-    #             task = scheduler_get_bots_unscheduled_task(bot_config.Todo_BotsTaskFolder)
-    #             if task:
-    #                 #self.logger.info(task)
-    #                 self.logger.info(task.subject)
-    #                 send_to_user(f"Looks like one of my tasks is due - {task.subject}")
-    #                 bot_logging.info(task.subject)
-    #                 current_date_time = datetime.now() 
-    #                 try:
-    #                     inital_prompt = f'''With only the tools provided and with the current date and time of {current_date_time}, help the human with the following request, Request: {task.subject} - {task.body}'''
-    #                     response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
-    #                     task.body = response
-    #                     task.mark_completed()
-    #                     task.save()
-    #                 except Exception as e:
-    #                     send_to_user( f"An exception occurred: {e}")
-    #             else:
-    #                 break
-
-    # def process_email_schedule(self):
-    #     if self.initialised:
-    #         "check emails"
-    #         scheduler_check_emails()
+ 
 
     def heartbeat(self):
         from_bot_to_bot_manager('heartbeat', os.getpid())
@@ -174,6 +137,8 @@ class aiBot:
         # tools.append(MSGetCalendarEvent())
         # tools.append(MSCreateCalendarEvent())
 
+        tools.append(NoteCreate())
+        tools.append(NoteAppend())
         return tools
     
     def get_credential(self, name):

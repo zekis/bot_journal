@@ -19,9 +19,18 @@ DATA_DIR = "data"
 
 #These are set on startup
 OPENAI_API_KEY = ""
-#TENANT_ID = ""
+APP_ID = ""
+APP_SECRET = ""
+
+TENANT_ID = ""
 FRIENDLY_NAME = ""
-#OFFICE_USER = ""
+OFFICE_USER = ""
+
+NOTEBOOK = ""
+SECTION = ""
+PAGE = ""
+
+
 
 RESET_CONFIG = False
 VERBOSE = True

@@ -5,3 +5,4 @@ langchain
 python-dateutil
 markdownify
 nltk
+chromadb

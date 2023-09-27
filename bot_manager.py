@@ -183,13 +183,21 @@ def clear_heartbeats():
     clear_queue(bot_config.BOT_ID)
 
 def register_self():
+    #These are set on startup
+    
+
     "send register message to server"
     "To use this bot, the server must send these values"
     required_credentials = []
     required_credentials.append('openai_api')
-    #required_credentials.append('tenant_id')
+    required_credentials.append('app_id')
+    required_credentials.append('app_secret')
+    required_credentials.append('tenant_id')
     required_credentials.append('user_name')
-    #required_credentials.append('email_address')
+    required_credentials.append('email_address')
+    required_credentials.append('notebook')
+    required_credentials.append('section')
+    required_credentials.append('page')
     register_package = {
         'description': bot_config.BOT_DESCRIPTION,
         'required_credentials': required_credentials
