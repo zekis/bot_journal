@@ -156,7 +156,7 @@ async def process_server_message():
                 return False
 
 
-            send_to_user(user_id, f"thinking...")
+            #send_to_user(user_id, f"thinking...")
             botManager.handle_instance(user_id)
             #always send credentials first
             send_credentials_to_instance(user_id, credentials)
@@ -189,15 +189,15 @@ def register_self():
     "send register message to server"
     "To use this bot, the server must send these values"
     required_credentials = []
-    required_credentials.append('openai_api')
-    required_credentials.append('app_id')
-    required_credentials.append('app_secret')
-    required_credentials.append('tenant_id')
-    required_credentials.append('user_name')
-    required_credentials.append('email_address')
-    required_credentials.append('notebook')
-    required_credentials.append('section')
-    required_credentials.append('page')
+    required_credentials.append(('openai_api','This is your OpenAI API key'))
+    required_credentials.append(('app_id','The Microsoft Application ID. This app must be given permission to access your onenote'))
+    required_credentials.append(('app_secret','The Microsoft Application secrect key'))
+    required_credentials.append(('tenant_id','Microsoft Application tenant ID'))
+    required_credentials.append(('user_name','Your office username. Usually this is firstname.lastname'))
+    required_credentials.append(('email_address','Your office EMAIL address'))
+    required_credentials.append(('notebook','The default noteboot to add journal entries too'))
+    required_credentials.append(('section','The default notebook section to add journal entries too'))
+
     register_package = {
         'description': bot_config.BOT_DESCRIPTION,
         'required_credentials': required_credentials

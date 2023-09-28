@@ -20,7 +20,7 @@ import sys
 #    MSDraftForwardEmail,
 #    MSDraftReplyToEmail
 #)
-from loaders.onenote import NoteCreate, NoteAppend
+from loaders.onenote import NoteAppend
 
 from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent
@@ -84,7 +84,6 @@ class aiBot:
                 bot_config.OFFICE_USER = self.get_credential('email_address')
                 bot_config.NOTEBOOK = self.get_credential('notebook')
                 bot_config.SECTION = self.get_credential('section')
-                bot_config.PAGE = self.get_credential('page')
                 self.bot_init()
 
             if prompt == "ping":
@@ -137,7 +136,7 @@ class aiBot:
         # tools.append(MSGetCalendarEvent())
         # tools.append(MSCreateCalendarEvent())
 
-        tools.append(NoteCreate())
+        #tools.append(NoteCreate())
         tools.append(NoteAppend())
         return tools
     
