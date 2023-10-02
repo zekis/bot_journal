@@ -1,9 +1,9 @@
 import os
 from datetime import datetime
-import bot_logging
+import common.bot_logging
 import bot_config
-from bot_handler import RabbitHandler
-from bot_comms import from_bot_manager, send_to_user, get_input, send_prompt, from_bot_to_bot_manager
+from common.bot_handler import RabbitHandler
+from common.bot_comms import from_bot_manager, send_to_user, get_input, send_prompt, from_bot_to_bot_manager
 import sys
 
 #from loaders.todo import MSGetTasks, MSGetTaskFolders, MSGetTaskDetail, MSSetTaskComplete, MSCreateTask, MSDeleteTask, MSCreateTaskFolder, MSUpdateTask
@@ -34,8 +34,8 @@ from langchain.prompts import MessagesPlaceholder
 class aiBot:
 
     def __init__(self):
-        self.logger = bot_logging.logging.getLogger('BotInstance') 
-        self.logger.addHandler(bot_logging.file_handler)
+        self.logger = common.bot_logging.logging.getLogger('BotInstance') 
+        self.logger.addHandler(common.bot_logging.file_handler)
         self.logger.info(f"Init Bot Instance")
         self.credentials = []
         self.initialised = False
@@ -86,6 +86,11 @@ class aiBot:
                 bot_config.SECTION = self.get_credential('section')
                 self.bot_init()
 
+            if prompt == "credential_update":
+                send_to_user( f"Settings updated")
+                return
+
+
             if prompt == "ping":
                 send_to_user(f'PID:{os.getpid()} - pong')
                 return
@@ -98,11 +103,15 @@ class aiBot:
             if prompt and self.initialised:
                 #AI goes here
                 self.process_model(prompt)
+                #this bot can shut itself down
+                #sys.exit()
 
     def process_model(self, question):
         current_date_time = datetime.now()
+        current_date = current_date_time.strftime('%A, %B %d, %Y')
+        current_time = current_date_time.strftime('%H:%M')
         #inital_prompt = f"Previous conversation: {self.memory.buffer_as_str}" + f''', Thinking step by step and With only the tools provided and with the current date and time of {current_date_time} help the human with the following request, Request: {question} '''
-        inital_prompt = f'''With the current date and time of {current_date_time} help the human with the following request, Request: {question} '''
+        inital_prompt = f'''Noting the current date {current_date} or time of {current_time} help the human with the following request, Request: {question} '''
         response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
         self.logger.info(response)
 
@@ -114,29 +123,6 @@ class aiBot:
     def load_tools(self, llm) -> list():
         
         tools = load_tools(["human"], input_func=get_input, prompt_func=send_prompt, llm=llm)
-        
-        # tools.append(MSGetTaskFolders())
-        # tools.append(MSGetTasks())
-        # tools.append(MSGetTaskDetail())
-        # tools.append(MSSetTaskComplete())
-        # tools.append(MSCreateTask())
-        # tools.append(MSDeleteTask())
-        # tools.append(MSCreateTaskFolder())
-        
-        # tools.append(MSSearchEmailsId())
-        # tools.append(MSGetEmailDetail())
-        # tools.append(MSDraftEmail())
-        # tools.append(MSSendEmail())
-        # tools.append(MSReplyToEmail())
-        # tools.append(MSForwardEmail())
-        # tools.append(MSDraftReplyToEmail())
-        # tools.append(MSDraftForwardEmail())
-
-        # tools.append(MSGetCalendarEvents())
-        # tools.append(MSGetCalendarEvent())
-        # tools.append(MSCreateCalendarEvent())
-
-        #tools.append(NoteCreate())
         tools.append(NoteAppend())
         return tools
     

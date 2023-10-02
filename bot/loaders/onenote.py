@@ -1,21 +1,21 @@
 import traceback
 import bot_config
-import bot_logging
+import common.bot_logging
 import requests
 
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Type
 
-from bot_comms import publish_event_card, publish_list
-from bot_utils import tool_description, tool_error
+from common.bot_comms import publish_event_card, publish_list, publish_error
+from common.bot_utils import tool_description, tool_error
 
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools import BaseTool
 
 
-tool_logger = bot_logging.logging.getLogger('ToolLogger')
-tool_logger.addHandler(bot_logging.file_handler)
+tool_logger = common.bot_logging.logging.getLogger('ToolLogger')
+tool_logger.addHandler(common.bot_logging.file_handler)
 
 def get_access_token(tenant_id, client_id, client_secret):
     url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
@@ -95,11 +95,18 @@ def update_page(access_token, user_principal, page_id, new_content):
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json'
     }
+    # Get the current date and time
+    current_date_time = datetime.now()
+
+    # Format the current date and time to display only hours and minutes
+    current_time = current_date_time.strftime('%H:%M')
+
+
     body = [
         {
             "target": "body",
             "action": "append",
-            "content": f"<p>{new_content}</p>"
+            "content": f"</p></p></p></p><p><h2>{current_time}</h2><p>{new_content}</p></p></p></p></p></p></p></p>"
         }
     ]
     response = requests.patch(url, headers=headers, json=body)
@@ -168,7 +175,7 @@ class NoteAppend(BaseTool):
                         status_code = update_page(access_token, user_principal, page_id, new_content)
                         if status_code == 204:
                             'do nothing'
-                            #return(f"The page in '{notebook_name}' notebook and '{section_name}' section was updated successfully.")
+                            return(f"Journal updated.")
                         else:
                             return(f"Failed to update the page. Status Code: {status_code}")
                     
@@ -180,6 +187,7 @@ class NoteAppend(BaseTool):
         except Exception as e:
             #traceback.print_exc()
             tb = traceback.format_exc()
+            publish_error(e, tb)
             return tool_error(e, tb, self.description)
     
     async def _arun(self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None) -> str:

@@ -40,8 +40,7 @@ async def heartbeat_loop():
         
 
 async def main():
-    bot_config.BOT_ID = "journal"
-    bot_config.BOT_DESCRIPTION = "Used to store and retrieve the users journal/history of daily activities. This bot automatically creates a new page every week to append new journal entries too"
+ 
     
 
     logger = bot_logging.logging.getLogger('Bot_Journal') 

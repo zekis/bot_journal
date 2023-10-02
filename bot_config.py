@@ -5,9 +5,8 @@ import os
 load_dotenv()
 
 DISPATCHER_CHANNEL_ID = "botmanager"
-BOT_ID = ""
-BOT_DESCRIPTION = ""
-
+BOT_ID = "journal"
+BOT_DESCRIPTION = "Used to store and retrieve the users journal/history of daily activities."
 
 APP_ID = os.getenv("MicrosoftAppId")
 APP_PASSWORD = os.getenv("MicrosoftAppPassword")

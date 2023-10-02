@@ -30,6 +30,7 @@ def create_list_card(message,strings_values):
                 "title": "Open",
                 "id": "btnSummary"
             }
+            
         ]
     }
 
@@ -150,6 +151,14 @@ def create_email_card(message,email, summary):
                 "type": "Action.OpenUrl",
                 "title": "Open in Outlook",
                 "url": link
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Ignore Sender Domain",
+                "mode": "secondary",
+                "data": {
+                    "acDecision": f"userman add setting ignore_domains {email.sender.address.split('@')[1]}"
+                }
             },
             {
                 "type": "Action.Submit",
@@ -663,3 +672,53 @@ def create_input_card(intro, parameters):
     }
 
     return json.dumps(card)
+
+
+def create_error_card(bot_id, error, exception):
+    
+    cards = {
+        "type": "AdaptiveCard",
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",  
+        "version": "1.4",
+        "body": [
+            {
+                "type": "Container",
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "size": "medium",
+                        "weight": "Bolder",
+                        "horizontalAlignment": "Left",
+                        "text": error
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": bot_id,
+                        "weight": "bolder",
+                        "wrap": True
+                    },
+                    
+                    {
+                        "type": "TextBlock",
+                        "spacing": "none",
+                        "text": f"{exception}",
+                        "isSubtle": True,
+                        "wrap": True
+                    }
+                ],
+            }
+        ],
+            "actions": [
+                
+                {
+                "type": "Action.Submit",
+                "title": "Restart Bot",
+                "mode": "secondary",
+                "data": {
+                    "acDecision": f"botman {bot_id} restart"
+                }
+            }
+            ]
+    }
+
+    return json.dumps(cards)
