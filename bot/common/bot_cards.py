@@ -30,7 +30,6 @@ def create_list_card(message,strings_values):
                 "title": "Open",
                 "id": "btnSummary"
             }
-            
         ]
     }
 
@@ -158,6 +157,14 @@ def create_email_card(message,email, summary):
                 "mode": "secondary",
                 "data": {
                     "acDecision": f"userman add setting ignore_domains {email.sender.address.split('@')[1]}"
+                }
+            },
+            {
+                "type": "Action.Submit",
+                "title": "Add To Journal",
+                "mode": "secondary",
+                "data": {
+                    "acDecision": f"Please use the journal assistant To make a note of the email about {email.subject} for {bot_config.FRIENDLY_NAME} with the details: {summary}"
                 }
             },
             {
