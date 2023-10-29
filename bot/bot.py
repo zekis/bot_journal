@@ -7,15 +7,17 @@ from datetime import datetime
 import asyncio
 import threading
 
+sys.path.append("/root/projects")
 import common.bot_logging
+
 import bot_config
 from bot_main import aiBot
 #from bot_comms import publish, publish_action, publish_actions
 
 
 from common.bot_comms import send_to_user
-logger = common.bot_logging.logging.getLogger('BotInstance') 
-logger.addHandler(common.bot_logging.file_handler)
+#logger = common.bot_logging.logging.getLogger('BotInstance') 
+#logger.addHandler(common.bot_logging.file_handler)
 
 
 async def heartbeat_scheduler(bot):
@@ -56,7 +58,7 @@ async def main():
     bot = aiBot()
     
     
-    logger.info(f"Init Bot Instance")
+    common.bot_logging.bot_logger.info(f"Init Bot Instance")
 
     
     ai_tasks = []
@@ -82,5 +84,6 @@ if __name__ == "__main__":
     bot_config.BOT_ID = args.bot_id
 
     #bot_config.RESET_CONFIG = args.reset_config
+    common.bot_logging.init()
     
     asyncio.run(main())

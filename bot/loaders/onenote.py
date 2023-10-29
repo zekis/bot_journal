@@ -1,11 +1,13 @@
+import sys
 import traceback
 import bot_config
-import common.bot_logging
 import requests
 
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Type
 
+sys.path.append("/root/projects")
+import common.bot_logging
 from common.bot_comms import publish_event_card, publish_list, publish_error
 from common.bot_utils import tool_description, tool_error
 
@@ -14,8 +16,8 @@ from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, Callback
 from langchain.tools import BaseTool
 
 
-tool_logger = common.bot_logging.logging.getLogger('ToolLogger')
-tool_logger.addHandler(common.bot_logging.file_handler)
+#common.bot_logging.bot_logger = common.bot_logging.logging.getLogger('ToolLogger')
+#common.bot_logging.bot_logger.addHandler(common.bot_logging.file_handler)
 
 def get_access_token(tenant_id, client_id, client_secret):
     url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
@@ -44,7 +46,7 @@ def create_notebook(access_token, user_principal, notebook_name):
         'displayName': notebook_name
     }
     response = requests.post(url, headers=headers, json=body)
-    tool_logger.debug(response.text)
+    common.bot_logging.bot_logger.debug(response.text)
     return response.json()
 
 def create_page(access_token, user_principal, section_id, page_name, new_content):
@@ -63,30 +65,33 @@ def get_notebook_id(access_token, user_principal, notebook_name):
     url = f'https://graph.microsoft.com/v1.0/users/{user_principal}/onenote/notebooks'
     headers = {'Authorization': f'Bearer {access_token}'}
     response = requests.get(url, headers=headers)
-    tool_logger.debug(response.text)
+    common.bot_logging.bot_logger.info(response.text)
     for notebook in response.json()['value']:
         if notebook['displayName'] == notebook_name:
             return notebook['id']
+    publish_error(f'Could not find notebook {notebook_name}',notebook_name)
     return None
 
 def get_section_id(access_token, user_principal, notebook_id, section_name):
     url = f'https://graph.microsoft.com/v1.0/users/{user_principal}/onenote/notebooks/{notebook_id}/sections'
     headers = {'Authorization': f'Bearer {access_token}'}
     response = requests.get(url, headers=headers)
-    tool_logger.debug(response.text)
+    common.bot_logging.bot_logger.info(response.text)
     for section in response.json()['value']:
         if section['displayName'] == section_name:
             return section['id']
+    publish_error(f'Could not find notebook section {section_name}',section_name)
     return None
 
 def get_page_id(access_token, user_principal, section_id, page_name):
     url = f'https://graph.microsoft.com/v1.0/users/{user_principal}/onenote/sections/{section_id}/pages'
     headers = {'Authorization': f'Bearer {access_token}'}
     response = requests.get(url, headers=headers)
-    tool_logger.debug(response.text)
+    common.bot_logging.bot_logger.info(response.text)
     for page in response.json()['value']:
         if page['title'] == page_name:
             return page['id']
+    publish_error(f'Could not find notebook page {page_name}',page_name)
     return None
 
 def update_page(access_token, user_principal, page_id, new_content):
@@ -110,7 +115,7 @@ def update_page(access_token, user_principal, page_id, new_content):
         }
     ]
     response = requests.patch(url, headers=headers, json=body)
-    tool_logger.info(response.text)
+    common.bot_logging.bot_logger.info(response.text)
     return response.status_code
 
 
@@ -141,6 +146,8 @@ class NoteAppend(BaseTool):
             user_principal = bot_config.OFFICE_USER
             notebook_name = bot_config.NOTEBOOK
             section_name = bot_config.SECTION
+
+            
             # Get the current date
             now = datetime.now()
 
@@ -153,6 +160,7 @@ class NoteAppend(BaseTool):
             # Create the page name
             page_name = f'Week Begins {start_of_week_str}'
 
+            common.bot_logging.bot_logger.info(f"tenant_id: {tenant_id}, client_id: {client_id}, client_secret: {client_secret}, user_principal: {user_principal}, notebook_name: {notebook_name}, section_name: {section_name}, page_name: {page_name}")
 
             #page_name = 'Week Begins 2023-09-25'
             new_content = content
@@ -175,7 +183,9 @@ class NoteAppend(BaseTool):
                         status_code = update_page(access_token, user_principal, page_id, new_content)
                         if status_code == 204:
                             'do nothing'
-                            return(f"Journal updated.")
+                            return(f"""Added the following to your journal:
+                            
+{content}""")
                         else:
                             return(f"Failed to update the page. Status Code: {status_code}")
                     

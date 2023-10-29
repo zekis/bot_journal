@@ -9,6 +9,9 @@ comms_logger = bot_logging.logging.getLogger('BotComms')
 comms_logger.addHandler(bot_logging.file_handler)
 "This module handles sending and recieving between server and bots"
 
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+message_channel = connection.channel()
+
 def encode_command(bot_id, command: str, data: str) -> str:
     "encode a <prompt> into a dict and return a string to send via rabbitmq to a bot"
     
@@ -79,15 +82,15 @@ def from_dispatcher() -> str:
 
     channel_id = bot_config.BOT_ID    
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    #message_channel = connection.channel()
     
     message_channel.queue_declare(queue=channel_id)
 
     method, properties, body = message_channel.basic_get(queue=channel_id, auto_ack=True)
 
-    message_channel.close()
+    #message_channel.close()
 
     if body:
         response = decode_response(body)
@@ -104,9 +107,9 @@ def send_to_dispatcher(command: str, data: str):
 
     comms_logger.debug(f"CHANNEL: {channel_id} - {bot_id} - {command}")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    #message_channel = connection.channel()
 
     message_channel.queue_declare(queue=channel_id)
 
@@ -123,9 +126,9 @@ def send_to_user(user_id: str, prompt: str):
 
     comms_logger.info(f"CHANNEL: {channel_id} - {user_id} - {prompt}")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    #message_channel = connection.channel()
 
     message_channel.queue_declare(queue=channel_id)
 
@@ -140,9 +143,9 @@ def send_to_instance(user_id: str, prompt: str):
 
     comms_logger.info(f"CHANNEL: {bot_instance_channel} - {user_id} - {prompt}")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    #message_channel = connection.channel()
 
     message_channel.queue_declare(queue=bot_instance_channel)
 
@@ -158,9 +161,9 @@ def send_credentials_to_instance(user_id: str, credentials: list):
 
     comms_logger.info(f"CHANNEL: {bot_instance_channel} - {user_id} - {credentials}")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    #message_channel = connection.channel()
 
     message_channel.queue_declare(queue=bot_instance_channel)
 
@@ -173,9 +176,9 @@ def clear_queue(channel_id: str):
     "clear message queue (do this on start)"
     comms_logger.info("Clearing message queue")
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 
-    message_channel = connection.channel()
+    # message_channel = connection.channel()
 
     message_channel.queue_delete(channel_id)
 

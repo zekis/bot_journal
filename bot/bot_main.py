@@ -1,25 +1,16 @@
+import sys
 import os
 from datetime import datetime
-import common.bot_logging
 import bot_config
-from common.bot_handler import RabbitHandler
-from common.bot_comms import from_bot_manager, send_to_user, get_input, send_prompt, from_bot_to_bot_manager
-import sys
 
-#from loaders.todo import MSGetTasks, MSGetTaskFolders, MSGetTaskDetail, MSSetTaskComplete, MSCreateTask, MSDeleteTask, MSCreateTaskFolder, MSUpdateTask
-#from loaders.calendar import MSGetCalendarEvents, MSGetCalendarEvent, MSCreateCalendarEvent
-#from loaders.todo import scheduler_get_task_due_today, scheduler_get_bots_unscheduled_task
-#from loaders.outlook import scheduler_check_emails
-#from loaders.outlook import (
-#    MSSearchEmailsId,
-#    MSGetEmailDetail,
-#    MSDraftEmail,
-#    MSSendEmail,
-#    MSReplyToEmail,
-#    MSForwardEmail,
-#    MSDraftForwardEmail,
-#    MSDraftReplyToEmail
-#)
+
+
+sys.path.append("/root/projects")
+import common.bot_logging
+from common.bot_handler import RabbitHandler
+from common.bot_comms import from_bot_manager, send_to_user, get_input, send_prompt, from_bot_to_bot_manager, publish_error
+from common.bot_forward import Forward
+
 from loaders.onenote import NoteAppend
 
 from langchain.chat_models import ChatOpenAI
@@ -34,9 +25,9 @@ from langchain.prompts import MessagesPlaceholder
 class aiBot:
 
     def __init__(self):
-        self.logger = common.bot_logging.logging.getLogger('BotInstance') 
-        self.logger.addHandler(common.bot_logging.file_handler)
-        self.logger.info(f"Init Bot Instance")
+        #common.bot_logging.bot_logger = common.bot_logging.logging.getLogger('BotInstance') 
+        #common.bot_logging.bot_logger.addHandler(common.bot_logging.file_handler)
+        common.bot_logging.bot_logger.info(f"Init Bot Instance")
         self.credentials = []
         self.initialised = False
 
@@ -87,9 +78,12 @@ class aiBot:
                 self.bot_init()
 
             if prompt == "credential_update":
-                send_to_user( f"Settings updated")
+                send_to_user( f"{bot_config.BOT_ID} Settings Updated")
                 return
 
+            if prompt == "start_scheduled_tasks":
+                #self.pause_schedule = False
+                return
 
             if prompt == "ping":
                 send_to_user(f'PID:{os.getpid()} - pong')
@@ -113,7 +107,7 @@ class aiBot:
         #inital_prompt = f"Previous conversation: {self.memory.buffer_as_str}" + f''', Thinking step by step and With only the tools provided and with the current date and time of {current_date_time} help the human with the following request, Request: {question} '''
         inital_prompt = f'''Noting the current date {current_date} or time of {current_time} help the human with the following request, Request: {question} '''
         response = self.agent_executor.run(input=inital_prompt, callbacks=[self.handler])
-        self.logger.info(response)
+        common.bot_logging.bot_logger.info(response)
 
  
 
@@ -124,12 +118,13 @@ class aiBot:
         
         tools = load_tools(["human"], input_func=get_input, prompt_func=send_prompt, llm=llm)
         tools.append(NoteAppend())
+        tools.append(Forward())
         return tools
     
     def get_credential(self, name):
-        self.logger.info(f"Fetching credential for: {name}")
+        common.bot_logging.bot_logger.info(f"Fetching credential for: {name}")
         for credential in self.credentials:
             if name in credential:
-                self.logger.debug(credential[name])
+                common.bot_logging.bot_logger.debug(credential[name])
                 return credential[name]
         return False
